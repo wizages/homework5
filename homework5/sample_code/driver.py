@@ -6,6 +6,8 @@ from nav_msgs.msg import Path
 from geometry_msgs.msg import PoseStamped
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 
+
+
 def callback(data):
 
     point1 = data.poses[0]
@@ -18,15 +20,17 @@ def callback(data):
     # Create a message to publish
     cmd = Twist()
 
-    twist.linear.x = calculated_x
-    twist.linear.y = calculated_y
-    twist.angular.z = calculated_theta
+    cmd.linear.x = calculated_x
+    cmd.linear.y = calculated_y
+    cmd.angular.z = calculated_theta
 
     pub.publish(cmd)
     rate.sleep()
 
 # Start a ROS node.
 rospy.init_node('driver')
+rate = rospy.Rate(10)
+
 # Wheel velocity publisher
 pub = rospy.Publisher("cmd_vel", Twist, queue_size=10)
 
