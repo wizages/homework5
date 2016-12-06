@@ -15,75 +15,81 @@ def MapCallback(msg):
     occGrid = msg
     gotMap = True
 
+def CopyOccGrid(occGrid):
+    gridCopy = []
+    for y in range(200):
+        gridCopy.append([])
+        for x in range(200):
+            index = y * occGrid.info.width + x
+            gridCopy[y].append(occGrid.data[index])
+
+    return gridCopy
+
 def GetFillNeighborPoints(y,x):
-    global mapArr, occGrid
+    global mapArr, gridCopy
 
     neighbors = []
 
     if y+1 <= 199:
         index = y*occGrid.info.width + x
-        if mapArr[y+1][x] ==0 and occGrid.data[index] == 0:
+        if mapArr[y+1][x] ==0 and gridCopy[y+1][x] == 0:
             neighbors.append([y+1,x])
 
 
     if y-1 >=0 :
         index = y*occGrid.info.width + x
-        if mapArr[y-1][x] ==0 and occGrid.data[index] == 0:
+        if mapArr[y-1][x] ==0 and gridCopy[y-1][x] == 0:
             neighbors.append([y-1,x])
 
 
     if x+1 <= 199:
         index = y*occGrid.info.width + x
-        if mapArr[y][x+1] ==0 and occGrid.data[index] == 0:
+        if mapArr[y][x+1] ==0 and gridCopy[y][x+1] == 0:
             neighbors.append([y,x+1])
 
 
     if x-1 >= 0:
         index = y*occGrid.info.width + x
-        if mapArr[y][x-1] ==0 and occGrid.data[index] == 0:
+        if mapArr[y][x-1] ==0 and gridCopy[y][x-1] == 0:
             neighbors.append([y,x-1])
 
 
     return neighbors
 
 def GetDFSNeighborPoints(y,x):
-
+    global gridCopy
     neighbors = []
 
 
     if x+1 <= 199:
         index = y*occGrid.info.width + x
-        if occGrid.data[index] == 0:
+        if gridCopy[y][x+1] == 0:
             neighbors.append([y,x+1])
 
     if y+1 <= 199:
         index = y*occGrid.info.width + x
-        if occGrid.data[index] == 0:
+        if gridCopy[y+1][x] == 0:
             neighbors.append([y+1,x])
 
 
     if y-1 >=0 :
         index = y*occGrid.info.width + x
-        if occGrid.data[index] == 0:
+        if gridCopy[y-1][x] == 0:
             neighbors.append([y-1,x])
 
 
     if x-1 >= 0:
         index = y*occGrid.info.width + x
-        if occGrid.data[index] == 0:
+        if gridCopy[y][x-1] == 0:
             neighbors.append([y,x-1])
 
 
     return neighbors
 
 def WaveFront(y,x):
-    global gpsX, gpsY, occGrid, pathFound, mapArr
+    global gpsX, gpsY, pathFound, mapArr
 
 
-
-    xindex = x#int(((x-99)/10-occGrid.info.origin.position.x)*(1.0/occGrid.info.resolution))
-    yindex = y#int(((y-99)/10-occGrid.info.origin.position.y)*(1.0/occGrid.info.resolution))
-    dataindex = yindex*occGrid.info.width + xindex
 
     i = 1
     nextPoints = []
@@ -95,8 +101,6 @@ def WaveFront(y,x):
             mapArr[point[0]][point[1]] = i
 
         i = i + 1
-        print i
-
 
         for point in allPoints:
             nextPoints.append(GetFillNeighborPoints(point[0],point[1]))
@@ -159,6 +163,44 @@ def SteepestDescent(iterations):
     rate.sleep()
     pathFound = False
 
+def IgniteFire(y,x, fireList):
+
+    if x+1 <= 199:
+        fireList[y][x+1] = 100
+
+    if y+1 <= 199:
+        fireList[y+1][x] = 100
+
+    if y-1 >=0 :
+        fireList[y-1][x] = 100
+
+    if x-1 >= 0:
+        fireList[y][x-1] = 100
+
+
+def BrushFire():
+    global gridCopy
+
+    fireList = []
+
+    for y in range(200):
+        fireList.append([])
+        for x in range(200):
+            fireList[y].append(gridCopy[y][x])
+            
+
+
+    for y in range(200):
+        for x in range(200):
+            if gridCopy[y][x] == 100:
+                IgniteFire(y,x, fireList)
+
+    for y in range(200):
+        for x in range(200):
+            if fireList[y][x] == 100:
+                IgniteFire(y,x,gridCopy)
+
+    #return fireList
 
 gpsX = 0
 gpsY = 0
@@ -174,6 +216,7 @@ pathFound = False
 gotMap = False
 dfsDone = False
 PATHTOGOAL = []
+gridCopy = []
 
 mapArr = [[0 for x in range(200)] for y in range(200)]
 mapArr[goalX][goalY] = 1
@@ -189,5 +232,8 @@ rospy.Subscriber("map", OccupancyGrid, MapCallback)
 
 while not rospy.is_shutdown():
     if gotMap:
+        gridCopy = CopyOccGrid(occGrid)
+        BrushFire()
         iterations = WaveFront(goalY, goalX)
         SteepestDescent(iterations)
+        rate.sleep()
