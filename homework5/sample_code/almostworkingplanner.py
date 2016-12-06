@@ -50,6 +50,12 @@ def GetDFSNeighborPoints(y,x):
 
     neighbors = []
 
+
+    if x+1 <= 199:
+        index = y*occGrid.info.width + x
+        if occGrid.data[index] == 0:
+            neighbors.append([y,x+1])
+
     if y+1 <= 199:
         index = y*occGrid.info.width + x
         if occGrid.data[index] == 0:
@@ -60,12 +66,6 @@ def GetDFSNeighborPoints(y,x):
         index = y*occGrid.info.width + x
         if occGrid.data[index] == 0:
             neighbors.append([y-1,x])
-
-
-    if x+1 <= 199:
-        index = y*occGrid.info.width + x
-        if occGrid.data[index] == 0:
-            neighbors.append([y,x+1])
 
 
     if x-1 >= 0:
@@ -117,9 +117,11 @@ def WaveFront(y,x):
 
 def DFS(coord,i, path=[]):
     global mapArr, dfsDone, goalY, goalX, PATHTOGOAL
+
     finalpath = []
-    if mapArr[coord[0]][coord[1]] != i:
+    if mapArr[coord[0]][coord[1]] != i or dfsDone:
         return
+
     if coord[0] == goalY and coord[1] == goalX:
         dfsDone = True
         PATHTOGOAL = path
@@ -127,17 +129,15 @@ def DFS(coord,i, path=[]):
     path.append([coord[0],coord[1]])
 
     neighbors = GetDFSNeighborPoints(coord[0],coord[1])
-    print neighbors
 
     if not dfsDone:
         for point in neighbors:
             finalpath = DFS(point,i-1, path)
 
-    return finalpath
 
 def SteepestDescent(iterations):
     print "found path"
-    global gpsX, gpsY
+    global gpsX, gpsY, PATHTOGOAL
 
     finalPath = Path()
     finalPath.header.frame_id = "map"
