@@ -15,12 +15,12 @@ def MapCallback(msg):
     occGrid = msg
     gotMap = True
 
-def GetNeighborPoints(y,x):
+def GetFillNeighborPoints(y,x):
     global mapArr, occGrid
 
     neighbors = []
 
-    if y+1 <= 9:
+    if y+1 <= 199:
         index = y*occGrid.info.width + x
         if mapArr[y+1][x] ==0 and occGrid.data[index] == 0:
             neighbors.append([y+1,x])
@@ -32,7 +32,7 @@ def GetNeighborPoints(y,x):
             neighbors.append([y-1,x])
 
 
-    if x+1 <= 9:
+    if x+1 <= 199:
         index = y*occGrid.info.width + x
         if mapArr[y][x+1] ==0 and occGrid.data[index] == 0:
             neighbors.append([y,x+1])
@@ -42,6 +42,29 @@ def GetNeighborPoints(y,x):
         index = y*occGrid.info.width + x
         if mapArr[y][x-1] ==0 and occGrid.data[index] == 0:
             neighbors.append([y,x-1])
+
+
+    return neighbors
+
+def GetDFSNeighborPoints(y,x):
+    global mapArr, occGrid
+
+    neighbors = []
+
+    if y+1 <= 199:
+       neighbors.append([y+1,x])
+
+
+    if y-1 >=0 :
+        neighbors.append([y-1,x])
+
+
+    if x+1 <= 199:
+        neighbors.append([y,x+1])
+
+
+    if x-1 >= 0:
+        neighbors.append([y,x-1])
 
 
     return neighbors
@@ -69,7 +92,7 @@ def WaveFront(y,x):
 
 
         for point in allPoints:
-            nextPoints.append(GetNeighborPoints(point[0],point[1]))
+            nextPoints.append(GetFillNeighborPoints(point[0],point[1]))
 
         justPoints = []
         for pointset in nextPoints:
@@ -84,7 +107,7 @@ def WaveFront(y,x):
 
     return i
 
-def FindNext(x,y,i):
+def FindNext(y,x,i):
 
     global mapArr
 
@@ -107,6 +130,28 @@ def FindNext(x,y,i):
         return (y+1,x-1)
 
 
+def DFS(coord,i, path=[]):
+    global mapArr, dfsDone, goalY, goalX, PATHTOGOAL
+    finalpath = []
+    print i, coord[0], coord[1]
+    print mapArr[coord[0]][coord[1]]
+    if mapArr[coord[0]][coord[1]] != i:
+        return path
+    if coord[0] == goalY and coord[1] == goalX:
+        dfsDone = True
+        PATHTOGOAL = path
+
+    path.append([coord[0],coord[1]])
+
+    neighbors = GetDFSNeighborPoints(coord[0],coord[1])
+    print neighbors
+
+    if not dfsDone:
+        for point in neighbors:
+            finalpath = DFS(point,i-1, path)
+
+    return finalpath
+
 def SteepestDescent(iterations):
     print "found path"
     global gpsX, gpsY
@@ -116,16 +161,26 @@ def SteepestDescent(iterations):
 
     x = gpsX
     y = gpsY
+    
+    DFS([y,x],iterations-1)
+    print PATHTOGOAL
 
-
-    for i in range(iterations, 0, -1):
-        
-        y,x = FindNext(x,y,i)
-
+    for point in PATHTOGOAL:
+        print point
         p = PoseStamped()
-        p.pose.position.x = (x-99)/10
-        p.pose.position.y = (y-99)/10
+        p.pose.position.x = (point[1]-99)/10
+        p.pose.position.y = (point[0]-99)/10
         finalPath.poses.append(p)
+
+
+    '''for i in range(iterations, 0, -1):
+                    
+                    y,x = FindNext(x,y,i)
+            
+                    p = PoseStamped()
+                    p.pose.position.x = (x-99)/10
+                    p.pose.position.y = (y-99)/10
+                    finalPath.poses.append(p)'''
 
     pub.publish(finalPath)
     rate.sleep()
@@ -144,6 +199,8 @@ mapRes = 0.1
 occGrid = OccupancyGrid()
 pathFound = False
 gotMap = False
+dfsDone = False
+PATHTOGOAL = []
 
 mapArr = [[0 for x in range(200)] for y in range(200)]
 mapArr[goalX][goalY] = 1
