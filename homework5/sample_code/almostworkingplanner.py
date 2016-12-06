@@ -47,24 +47,31 @@ def GetFillNeighborPoints(y,x):
     return neighbors
 
 def GetDFSNeighborPoints(y,x):
-    global mapArr, occGrid
 
     neighbors = []
 
     if y+1 <= 199:
-       neighbors.append([y+1,x])
+        index = y*occGrid.info.width + x
+        if occGrid.data[index] == 0:
+            neighbors.append([y+1,x])
 
 
     if y-1 >=0 :
-        neighbors.append([y-1,x])
+        index = y*occGrid.info.width + x
+        if occGrid.data[index] == 0:
+            neighbors.append([y-1,x])
 
 
     if x+1 <= 199:
-        neighbors.append([y,x+1])
+        index = y*occGrid.info.width + x
+        if occGrid.data[index] == 0:
+            neighbors.append([y,x+1])
 
 
     if x-1 >= 0:
-        neighbors.append([y,x-1])
+        index = y*occGrid.info.width + x
+        if occGrid.data[index] == 0:
+            neighbors.append([y,x-1])
 
 
     return neighbors
@@ -107,36 +114,12 @@ def WaveFront(y,x):
 
     return i
 
-def FindNext(y,x,i):
-
-    global mapArr
-
-    print i
-    if mapArr[y+1][x] == i-1:
-        return (y+1,x)
-    elif mapArr[y+1][x+1] == i-1:
-        return (y+1,x+1)
-    elif mapArr[y][x+1]    == i-1:
-        return (y,x+1)
-    elif mapArr[y-1][x+1]  == i-1:
-        return (y-1, x+1)
-    elif mapArr[y-1][x]   == i-1: 
-        return (y-1,x)
-    elif mapArr[y-1][x-1]  == i-1:
-        return (x-1,x-1)
-    elif mapArr[y][x-1]   == i-1:
-        return (y,x-1)
-    elif mapArr[y+1][x-1]  == i-1:
-        return (y+1,x-1)
-
 
 def DFS(coord,i, path=[]):
     global mapArr, dfsDone, goalY, goalX, PATHTOGOAL
     finalpath = []
-    print i, coord[0], coord[1]
-    print mapArr[coord[0]][coord[1]]
     if mapArr[coord[0]][coord[1]] != i:
-        return path
+        return
     if coord[0] == goalY and coord[1] == goalX:
         dfsDone = True
         PATHTOGOAL = path
@@ -168,19 +151,9 @@ def SteepestDescent(iterations):
     for point in PATHTOGOAL:
         print point
         p = PoseStamped()
-        p.pose.position.x = (point[1]-99)/10
-        p.pose.position.y = (point[0]-99)/10
+        p.pose.position.x = (point[1]-99)/10.0
+        p.pose.position.y = (point[0]-99)/10.0
         finalPath.poses.append(p)
-
-
-    '''for i in range(iterations, 0, -1):
-                    
-                    y,x = FindNext(x,y,i)
-            
-                    p = PoseStamped()
-                    p.pose.position.x = (x-99)/10
-                    p.pose.position.y = (y-99)/10
-                    finalPath.poses.append(p)'''
 
     pub.publish(finalPath)
     rate.sleep()
