@@ -4,10 +4,13 @@ from geometry_msgs.msg import Pose2D, PoseStamped
 import math
 
 def GPSCallback(msg):
-    global gpsX, gpsY, needGPS
-    if gpsX != int(msg.x*10)+99 and gpsY != int(msg.y*10)+99 and needGPS:
+    global gpsX, gpsY, needGPS, gotGPS
+    if (gpsX != int(msg.x*10)+99 or gpsY != int(msg.y*10)+99) and needGPS:
         gpsX = int(msg.x*10)+99
         gpsY = int(msg.y*10)+99
+        mapArr = [[0 for x in range(200)] for y in range(200)]
+        mapArr[goalX][goalY] = 1
+        gotGPS = True
 
 def MapCallback(msg):
     #print "map callback"
@@ -95,7 +98,6 @@ def WaveFront(y,x):
     allPoints = [[y,x]]
 
     while mapArr[gpsY][gpsX] == 0:
-
         for point in allPoints:
             mapArr[point[0]][point[1]] = i
 
@@ -119,15 +121,17 @@ def WaveFront(y,x):
 
 
 def DFS(coord,i, path=[]):
-    global mapArr, dfsDone, goalY, goalX, PATHTOGOAL
-
+    global mapArr, dfsDone, goalY, goalX, PATHTOGOAL, gpsX, gpsY
+    
     finalpath = []
+
     if mapArr[coord[0]][coord[1]] != i or dfsDone:
         return
-
+    
     if coord[0] == goalY and coord[1] == goalX:
         dfsDone = True
         PATHTOGOAL = path
+        print path[0], path[1]
 
     path.append([coord[0],coord[1]])
 
@@ -140,15 +144,16 @@ def DFS(coord,i, path=[]):
 
 def SteepestDescent(iterations):
     global gpsX, gpsY, PATHTOGOAL
-    print "found path"
-    print gpsX, gpsY
+    #print "found path"
+    #print gpsX, gpsY
     finalPath = Path()
     finalPath.header.frame_id = "map"
 
     x = gpsX
     y = gpsY
-    
-    DFS([y,x],iterations-1)
+
+    path = []
+    DFS([y,x],iterations-1, path)
     #print PATHTOGOAL
 
     for point in PATHTOGOAL:
@@ -159,6 +164,8 @@ def SteepestDescent(iterations):
         finalPath.poses.append(p)
 
     pub.publish(finalPath)
+    PATHTOGOAL = []
+    #print finalPath.poses[0], finalPath.poses[1]
     #rate.sleep()
     pathFound = False
 
@@ -217,6 +224,7 @@ needGPS = True
 dfsDone = False
 PATHTOGOAL = []
 gridCopy = []
+gotGPS = False
 
 mapArr = [[0 for x in range(200)] for y in range(200)]
 mapArr[goalX][goalY] = 1
@@ -231,11 +239,15 @@ rospy.Subscriber("gps", Pose2D, GPSCallback)
 rospy.Subscriber("map", OccupancyGrid, MapCallback)
 
 while not rospy.is_shutdown():
-    if gotMap:
+    if gotMap and gotGPS:
         needGPS = False
         gridCopy = CopyOccGrid(occGrid)
         BrushFire()
         iterations = WaveFront(goalY, goalX)
         SteepestDescent(iterations)
+        dfsDone = False
         needGPS = True
+        mapArr = [[0 for x in range(200)] for y in range(200)]
+        mapArr[goalX][goalY] = 1
+        gotGPS = False
         #rate.sleep()
