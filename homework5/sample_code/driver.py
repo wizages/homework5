@@ -15,17 +15,22 @@ def GPSCallback(msg):
 def callback(data):
 
     point1 = data.poses[0]
-    point2 = data.poses[1]
+    point2 = data.poses[5]
 
-    calculated_x = point2.pose.position.x - point1.pose.position.x
-    calculated_y = point2.pose.position.y - point1.pose.position.y
-    if (calculated_x != 0):
-        calculated_theta = math.atan(calculated_y/calculated_x) - theta
-    elif(calculated_y > 0):
-        calculated_theta = 1.5707 - theta
-    elif(calculated_y < 0):
-        calculated_y = -1.5707 - theta
+    calculated_x = (point2.pose.position.x - point1.pose.position.x)/5
+    calculated_y = (point2.pose.position.y - point1.pose.position.y)/5
 
+    hypeShit = math.sqrt(calculated_x*calculated_x + calculated_y*calculated_y)
+    cosShit = math.acos(calculated_x/hypeShit)
+    sinShit = math.asin(calculated_y/hypeShit)
+
+    shit = cosShit + sinShit
+
+    calculated_theta = cosShit - theta
+
+    print calculated_theta, calculated_x, calculated_y
+
+        
     # Create a message to publish
     cmd = Twist()
 

@@ -103,6 +103,9 @@ def WaveFront(y,x):
 
         i = i + 1
 
+        if (i > 40000):
+            return -1
+
         for point in allPoints:
             nextPoints.append(GetFillNeighborPoints(point[0],point[1]))
 
@@ -184,6 +187,19 @@ def IgniteFire(y,x, fireList):
         fireList[y][x-1] = 100
 
 
+    if x+1 <=199 and y+1 <=199:
+        fireList[y+1][x+1] = 100
+
+    if x-1 >= 0 and y+1 <=199:
+        fireList[y+1][x-1] = 100
+
+    if x+1 <=199 and y-1 >= 0:
+        fireList[y-1][x+1] = 100
+
+    if x-1 >=0 and y-1 >=0:
+        fireList[y-1][x-1] = 100
+
+
 def BrushFire():
     global gridCopy
 
@@ -193,13 +209,6 @@ def BrushFire():
         fireList.append([])
         for x in range(200):
             fireList[y].append(gridCopy[y][x])
-            
-
-
-    for y in range(200):
-        for x in range(200):
-            if gridCopy[y][x] == 100:
-                IgniteFire(y,x, fireList)
 
     for y in range(200):
         for x in range(200):
@@ -243,8 +252,10 @@ while not rospy.is_shutdown():
         needGPS = False
         gridCopy = CopyOccGrid(occGrid)
         BrushFire()
+        BrushFire()
         iterations = WaveFront(goalY, goalX)
-        SteepestDescent(iterations)
+        if iterations > 0:
+            SteepestDescent(iterations)
         dfsDone = False
         needGPS = True
         mapArr = [[0 for x in range(200)] for y in range(200)]
