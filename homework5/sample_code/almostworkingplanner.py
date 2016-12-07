@@ -4,12 +4,13 @@ from geometry_msgs.msg import Pose2D, PoseStamped
 import math
 
 def GPSCallback(msg):
-    global gpsX, gpsY
-    gpsX = (int(msg.x)*10)+99
-    gpsY = (int(msg.y)*10)+99
+    global gpsX, gpsY, needGPS
+    if gpsX != int(msg.x*10)+99 and gpsY != int(msg.y*10)+99 and needGPS:
+        gpsX = int(msg.x*10)+99
+        gpsY = int(msg.y*10)+99
 
 def MapCallback(msg):
-    print "map callback"
+    #print "map callback"
     global gotMap, occGrid
 
     occGrid = msg
@@ -89,8 +90,6 @@ def GetDFSNeighborPoints(y,x):
 def WaveFront(y,x):
     global gpsX, gpsY, pathFound, mapArr
 
-
-
     i = 1
     nextPoints = []
     allPoints = [[y,x]]
@@ -140,9 +139,9 @@ def DFS(coord,i, path=[]):
 
 
 def SteepestDescent(iterations):
-    print "found path"
     global gpsX, gpsY, PATHTOGOAL
-
+    print "found path"
+    print gpsX, gpsY
     finalPath = Path()
     finalPath.header.frame_id = "map"
 
@@ -150,17 +149,17 @@ def SteepestDescent(iterations):
     y = gpsY
     
     DFS([y,x],iterations-1)
-    print PATHTOGOAL
+    #print PATHTOGOAL
 
     for point in PATHTOGOAL:
-        print point
+        #print point
         p = PoseStamped()
         p.pose.position.x = (point[1]-99)/10.0
         p.pose.position.y = (point[0]-99)/10.0
         finalPath.poses.append(p)
 
     pub.publish(finalPath)
-    rate.sleep()
+    #rate.sleep()
     pathFound = False
 
 def IgniteFire(y,x, fireList):
@@ -214,6 +213,7 @@ mapRes = 0.1
 occGrid = OccupancyGrid()
 pathFound = False
 gotMap = False
+needGPS = True
 dfsDone = False
 PATHTOGOAL = []
 gridCopy = []
@@ -232,8 +232,10 @@ rospy.Subscriber("map", OccupancyGrid, MapCallback)
 
 while not rospy.is_shutdown():
     if gotMap:
+        needGPS = False
         gridCopy = CopyOccGrid(occGrid)
         BrushFire()
         iterations = WaveFront(goalY, goalX)
         SteepestDescent(iterations)
-        rate.sleep()
+        needGPS = True
+        #rate.sleep()
