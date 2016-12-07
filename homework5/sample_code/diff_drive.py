@@ -7,7 +7,7 @@ import math
 def callback(msg):
     xd = msg.linear.x
     yd = msg.linear.y
-    thd = msg.linear.z
+    thd = msg.angular.z
     v = math.sqrt(xd**2 + yd**2)
 
     phi2 = (-L*thd)/r + v/r
