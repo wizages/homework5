@@ -9,7 +9,7 @@ from math import *
 
 
 def GPSCallback(data):
-    global gps#, xp, P, W
+    global gps
 
     gps[0] = data.x
     gps[1] = data.y
@@ -47,7 +47,7 @@ sub = rospy.Subscriber("gps", Pose2D, GPSCallback)
 sub = rospy.Subscriber("cmd_joint_traj", JointTrajectory, wheelCallback)
 
 
-#publisher for filtered gps signal
+#publisher for filtered gps signal, pose estimate
 pub = rospy.Publisher("gps_filter", Pose2D, queue_size = 10)
 pub2 = rospy.Publisher("pose_estimate", PoseStamped, queue_size = 10)
 
@@ -130,7 +130,6 @@ while not rospy.is_shutdown():
     estPose.pose.orientation.z = quaternion[2]
     estPose.pose.orientation.w = quaternion[3]
     pub2.publish(estPose)
-    #rate.sleep()
 
 
    
