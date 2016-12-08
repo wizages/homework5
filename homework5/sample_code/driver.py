@@ -15,10 +15,10 @@ def GPSCallback(msg):
 def callback(data):
 
     point1 = data.poses[0]
-    point2 = data.poses[5]
+    point2 = data.poses[3]
 
-    calculated_x = (point2.pose.position.x - point1.pose.position.x)/5
-    calculated_y = (point2.pose.position.y - point1.pose.position.y)/5
+    calculated_x = (point2.pose.position.x - point1.pose.position.x)/3
+    calculated_y = (point2.pose.position.y - point1.pose.position.y)/3
 
     hypeShit = math.sqrt(calculated_x*calculated_x + calculated_y*calculated_y)
     cosShit = math.acos(calculated_x/hypeShit)
@@ -26,7 +26,10 @@ def callback(data):
 
     shit = cosShit + sinShit
 
-    calculated_theta = cosShit - theta
+    if calculated_y >= 0:
+        calculated_theta = cosShit - theta
+    else:
+        calculated_theta = sinShit - theta
 
     print calculated_theta, calculated_x, calculated_y
 
@@ -39,7 +42,7 @@ def callback(data):
     cmd.angular.z = calculated_theta
 
     pub.publish(cmd)
-    rate.sleep()
+    #rate.sleep()
 
 # Start a ROS node.
 rospy.init_node('driver')
