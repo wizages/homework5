@@ -23,7 +23,7 @@ def callback(data):
 
 # Start a ROS node.
 rospy.init_node('driver')
-rate = rospy.Rate(10)
+rate = rospy.Rate(5)
 
 gpsX = 0
 gpsY = 0
@@ -43,7 +43,7 @@ rospy.Subscriber("gps", Pose2D, GPSCallback)
 while not rospy.is_shutdown():
     if gotCallback:
         #point1 = path.poses[currentLocation]
-        point2 = path.poses[currentLocation]/2
+        point2 = path.poses[currentLocation+2]
 
         calculated_x = (point2.pose.position.x - gpsX)/2
         calculated_y = (point2.pose.position.y - gpsY)/2
@@ -68,6 +68,6 @@ while not rospy.is_shutdown():
         pub.publish(cmd)
         rate.sleep()
         counter = counter + 1
-        if counter == 100:
+        if counter == 50:
             currentLocation=currentLocation+1
             counter = 0
