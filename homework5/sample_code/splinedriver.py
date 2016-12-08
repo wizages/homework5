@@ -14,14 +14,15 @@ def GPSCallback(msg):
     theta = msg.theta
 
 def callback(data):
+    global gpsX, gpsY
 
     t0, t1 = 0, 1
-    x0 = data.poses[0].pose.position.x
-    x1 = data.poses[2].pose.position.x
-    x2 = data.poses[3].pose.position.x
-    y0 = data.poses[0].pose.position.y
-    y1 = data.poses[2].pose.position.y
-    y2 = data.poses[3].pose.position.y
+    x0 = gpsX
+    x1 = data.poses[3].pose.position.x
+    x2 = data.poses[4].pose.position.x
+    y0 = gpsY
+    y1 = data.poses[3].pose.position.y
+    y2 = data.poses[4].pose.position.y
 
     xd0 = x1-x0
     yd0 = y1-y0

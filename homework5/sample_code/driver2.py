@@ -38,7 +38,7 @@ path = Path()
 pub = rospy.Publisher("cmd_vel", Twist, queue_size=10)
 
 rospy.Subscriber("path", Path, callback)
-rospy.Subscriber("gps", Pose2D, GPSCallback)
+rospy.Subscriber("gps_filter", Pose2D, GPSCallback)
 
 while not rospy.is_shutdown():
     if gotCallback:
