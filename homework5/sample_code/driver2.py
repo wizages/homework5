@@ -38,15 +38,15 @@ path = Path()
 pub = rospy.Publisher("cmd_vel", Twist, queue_size=10)
 
 rospy.Subscriber("path", Path, callback)
-rospy.Subscriber("gps", Pose2D, GPSCallback)
+rospy.Subscriber("gps_filter", Pose2D, GPSCallback)
 
 while not rospy.is_shutdown():
     if gotCallback:
         #point1 = path.poses[currentLocation]
-        point2 = path.poses[currentLocation+3]
+        point2 = path.poses[currentLocation+4]
 
-        calculated_x = (point2.pose.position.x - gpsX)/3
-        calculated_y = (point2.pose.position.y - gpsY)/3
+        calculated_x = (point2.pose.position.x - gpsX)/8.
+        calculated_y = (point2.pose.position.y - gpsY)/8.
 
         hypeShit = math.sqrt(calculated_x*calculated_x + calculated_y*calculated_y)
         cosShit = math.acos(calculated_x/hypeShit)

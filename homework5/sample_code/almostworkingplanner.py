@@ -244,7 +244,7 @@ pub = rospy.Publisher("path", Path, queue_size=10)
 
 rate = rospy.Rate(10)
 
-rospy.Subscriber("gps", Pose2D, GPSCallback)
+rospy.Subscriber("gps_filter", Pose2D, GPSCallback)
 rospy.Subscriber("map", OccupancyGrid, MapCallback)
 
 while not rospy.is_shutdown():
