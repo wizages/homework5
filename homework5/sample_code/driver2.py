@@ -23,7 +23,7 @@ def callback(data):
 
 # Start a ROS node.
 rospy.init_node('driver')
-rate = rospy.Rate(5)
+rate = rospy.Rate(8)
 
 gpsX = 0
 gpsY = 0
@@ -43,16 +43,18 @@ rospy.Subscriber("gps", Pose2D, GPSCallback)
 while not rospy.is_shutdown():
     if gotCallback:
         #point1 = path.poses[currentLocation]
-        point2 = path.poses[currentLocation+2]
+        point2 = path.poses[currentLocation+3]
 
-        calculated_x = (point2.pose.position.x - gpsX)/2
-        calculated_y = (point2.pose.position.y - gpsY)/2
+        calculated_x = (point2.pose.position.x - gpsX)/3
+        calculated_y = (point2.pose.position.y - gpsY)/3
 
         hypeShit = math.sqrt(calculated_x*calculated_x + calculated_y*calculated_y)
         cosShit = math.acos(calculated_x/hypeShit)
         sinShit = math.asin(calculated_y/hypeShit)
  
         shit = cosShit + sinShit
+
+        #turn erros happen still oh well
         calculated_theta = cosShit - theta
 
         print calculated_theta, calculated_x, calculated_y
@@ -68,6 +70,6 @@ while not rospy.is_shutdown():
         pub.publish(cmd)
         rate.sleep()
         counter = counter + 1
-        if counter == 50:
+        if counter == 10:
             currentLocation=currentLocation+1
             counter = 0
