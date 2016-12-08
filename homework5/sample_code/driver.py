@@ -27,7 +27,16 @@ def callback(data):
 
     shit = cosShit + sinShit
 
-    calculated_theta = cosShit - theta
+    if calculated_y == 0 and calculated_x > 0:
+        calculated_theta = 0 - theta
+    elif calculated_y == 0 and calculated_x < 0:
+        calculated_theta = 3.14159 - theta
+    elif calculated_x == 0 and calculated_y > 0:
+        calculated_theta = 3.14159/2 - theta
+    elif calculated_x == 0 and calculated_y < 0:
+        calculated_theta = 3*3.14159/2 - theta
+    else:
+        calculated_theta = math.atan(calculated_y/calculated_x) - theta
 
     print calculated_theta, calculated_x, calculated_y
 

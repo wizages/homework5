@@ -51,13 +51,22 @@ while not rospy.is_shutdown():
         hypeShit = math.sqrt(calculated_x*calculated_x + calculated_y*calculated_y)
         cosShit = math.acos(calculated_x/hypeShit)
         sinShit = math.asin(calculated_y/hypeShit)
+        tanShit = math.atan2(calculated_y,calculated_x)
  
         shit = cosShit + sinShit
 
-        #turn erros happen still oh well
-        calculated_theta = cosShit - theta
 
-        print calculated_theta, calculated_x, calculated_y
+        if (tanShit > 0 and theta <= math.pi):
+            calculated_theta = tanShit - theta
+        else:
+            calculated_theta = tanShit - theta
+
+        if(abs(calculated_theta) > math.pi/2):
+            calculated_theta = -tanShit + theta
+
+
+
+        print theta, tanShit, calculated_theta
 
             
         # Create a message to publish
