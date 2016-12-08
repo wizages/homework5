@@ -71,7 +71,6 @@ x = np.zeros(3)
 V = np.array([[.0001,0,0],[0,.0001,0],[0,0,.0001]])
 W = np.array([[var2,0,0],[0,var2,0],[0,0,var2]])
 P = np.zeros((3,3))
-xp = np.zeros(3)
 
 H = np.array([[1,0,0],[0,1,0],[0,0,1]])
 HT = H.T
