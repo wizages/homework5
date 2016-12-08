@@ -13,12 +13,13 @@ def GPSCallback(msg):
     theta = msg.theta
 
 def callback(data):
+    global gpsY, gpsX
 
     point1 = data.poses[0]
     point2 = data.poses[3]
 
-    calculated_x = (point2.pose.position.x - point1.pose.position.x)/3
-    calculated_y = (point2.pose.position.y - point1.pose.position.y)/3
+    calculated_x = (point2.pose.position.x - gpsX)/3
+    calculated_y = (point2.pose.position.y - gpsY)/3
 
     hypeShit = math.sqrt(calculated_x*calculated_x + calculated_y*calculated_y)
     cosShit = math.acos(calculated_x/hypeShit)
@@ -26,10 +27,7 @@ def callback(data):
 
     shit = cosShit + sinShit
 
-    if calculated_y >= 0:
-        calculated_theta = cosShit - theta
-    else:
-        calculated_theta = sinShit - theta
+    calculated_theta = cosShit - theta
 
     print calculated_theta, calculated_x, calculated_y
 
